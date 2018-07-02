@@ -1,9 +1,9 @@
 //---------------------------------------------------------------------------------------------
 //
-// Library for the Mira One radio module.
+// Library for the Purplepoint Hertz board.
 //
-// Copyright 2016-2017, M2M Solutions AB
-// Written by Jonny Bergdahl, 2017-05-09
+// Copyright 2016-2018, M2M Solutions AB
+// Written by Jonny Bergdahl, 2018-04-19
 //
 // Licensed under the MIT license, see the LICENSE.txt file.
 //
@@ -12,10 +12,13 @@
 #define __HERTZ_h__
 
 #include "Arduino.h"
+#include "util/core.h"
 
 class HertzBoard
 {
 public:
+    HertzBoard();
+    
     void begin();
 
 	float getTemperature();
@@ -25,6 +28,8 @@ public:
 
     void setLed(uint8_t red, uint8_t green, uint8_t blue);
     void setLedIntensity(uint8_t percentage);
+    
+    Watchdog watchdog;
 private:
     uint16_t _ledIntensity = 100;
 };

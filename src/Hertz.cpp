@@ -20,6 +20,10 @@
 #define LM75A_REGISTER_TEMP			0
 #define LM75A_INVALID_TEMPERATURE	-1000.0f
 
+HertzBoard::HertzBoard()
+    : watchdog()
+{}
+
 void HertzBoard::begin()
 {
     pinMode(CM_PWRKEY, OUTPUT);

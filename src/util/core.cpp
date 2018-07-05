@@ -10,7 +10,7 @@
 //---------------------------------------------------------------------------------------------
 #include "core.h"
 #include <sam.h>
-#include <power.h>
+//#include "power.h"
 
 int Watchdog::enable(int maxPeriod, bool forSleep)
 {
@@ -140,7 +140,7 @@ int Watchdog::sleep(int period)
     return result;
 }
 
-int Watchdog::initialize()
+void Watchdog::initialize()
 {
     // Generic clock generator 2, divisor = 32 (2^(DIV+1))
     GCLK->GENDIV.reg = GCLK_GENDIV_ID(2) | GCLK_GENDIV_DIV(4);

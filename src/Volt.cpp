@@ -9,12 +9,12 @@
 //
 //---------------------------------------------------------------------------------------------
 //
-#ifdef PP_HERTZ
+#ifdef ARDUINO_PP_VOLT
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Includes
 //
-#include "Hertz.h"
+#include "Volt.h"
 #include "Wire.h"
 #include "util/rgbled.h"
 
@@ -22,31 +22,24 @@
 #define LM75A_REGISTER_TEMP			0
 #define LM75A_INVALID_TEMPERATURE	-1000.0f
 
-HertzBoard::HertzBoard()
+VoltBoard::VoltBoard()
     : watchdog()
 {}
 
-void HertzBoard::begin()
+void VoltBoard::begin()
 {
-    pinMode(CM_PWRKEY, OUTPUT);
-    digitalWrite(CM_PWRKEY, LOW);
-    pinMode(CM_PWR_EN, OUTPUT);
-    digitalWrite(CM_PWR_EN, LOW);
+    pinMode(VSW_EN, OUTPUT);
+    digitalWrite(VSW_EN, HIGH);
     pinMode(FLASH_CE, OUTPUT);
-    digitalWrite(CM_PWR_EN, LOW);
     pinMode(MIRA_RESET, OUTPUT);
-    digitalWrite(CM_PWR_EN, LOW);
+    digitalWrite(MIRA_RESET, LOW);
     pinMode(RGB_LED, OUTPUT);
     digitalWrite(RGB_LED, LOW);
-    pinMode(SD_CS, OUTPUT);
-    digitalWrite(CM_PWR_EN, LOW);
-    pinMode(CM_RI, INPUT);
-    pinMode(CM_STATUS, INPUT);
 
 	Wire.begin();
 }
 
-float HertzBoard::getTemperature()
+float VoltBoard::getTemperature()
 {	
 	Wire.beginTransmission(LM75A_ADDRESS);
 	Wire.write(LM75A_REGISTER_TEMP);
@@ -65,22 +58,17 @@ float HertzBoard::getTemperature()
 	return response / 256;
 }
 
-void HertzBoard::setCellularPower(bool state)
+void VoltBoard::setSwitchedPower(bool state)
 {
-    digitalWrite(CM_PWR_EN, state);
+    digitalWrite(VSW_EN, !state);
 }
 
-uint8_t HertzBoard::getCellularStatus()
+void VoltBoard::setLed(uint8_t red, uint8_t green, uint8_t blue)
 {
-	return !digitalRead(CM_STATUS);
+    setRgbLed(RGB_LED, red, green, blue, _ledIntensity);   
 }
 
-void HertzBoard::setLed(uint8_t red, uint8_t green, uint8_t blue)
-{
-    setRgbLed(RGB_LED, red, green, blue, _ledIntensity);
-}
-
-void HertzBoard::setLedIntensity(uint8_t percentage)
+void VoltBoard::setLedIntensity(uint8_t percentage)
 {
     _ledIntensity = percentage;
 }

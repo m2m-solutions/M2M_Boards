@@ -8,25 +8,24 @@
 // Licensed under the MIT license, see the LICENSE.txt file.
 //
 //---------------------------------------------------------------------------------------------
-#ifndef __HERTZ_h__
-#define __HERTZ_h__
+#ifndef __VOLT_h__
+#define __VOLT_h__
 
-#ifdef PP_HERTZ
+#ifdef ARDUINO_PP_VOLT
 
 #include "Arduino.h"
 #include "util/core.h"
 
-class HertzBoard
+class VoltBoard
 {
 public:
-    HertzBoard();
+    VoltBoard();
     
     void begin();
 
 	float getTemperature();
 
-    void setCellularPower(bool state);
-	uint8_t getCellularStatus();
+    void setSwitchedPower(bool state);
 
     void setLed(uint8_t red, uint8_t green, uint8_t blue);
     void setLedIntensity(uint8_t percentage);

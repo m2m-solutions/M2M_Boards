@@ -32,7 +32,7 @@ void VoltBoard::begin()
     digitalWrite(VSW_EN, HIGH);
     pinMode(FLASH_CE, OUTPUT);
     pinMode(MIRA_RESET, OUTPUT);
-    digitalWrite(MIRA_RESET, LOW);
+    digitalWrite(MIRA_RESET, HIGH);
     pinMode(RGB_LED, OUTPUT);
     digitalWrite(RGB_LED, LOW);
 

@@ -9,7 +9,7 @@
 //
 //---------------------------------------------------------------------------------------------
 //
-#ifdef PP_HERTZ
+#ifdef ARDUINO_PP_HERTZ
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Includes
@@ -32,14 +32,14 @@ void HertzBoard::begin()
     digitalWrite(CM_PWRKEY, LOW);
     pinMode(CM_PWR_EN, OUTPUT);
     digitalWrite(CM_PWR_EN, LOW);
-    pinMode(FLASH_CE, OUTPUT);
-    digitalWrite(CM_PWR_EN, LOW);
+    pinMode(FLASH_CS, OUTPUT);
+    digitalWrite(FLASH_CS, HIGH);
     pinMode(MIRA_RESET, OUTPUT);
-    digitalWrite(CM_PWR_EN, LOW);
+    digitalWrite(MIRA_RESET, HIGH);
     pinMode(RGB_LED, OUTPUT);
-    digitalWrite(RGB_LED, LOW);
+    digitalWrite(RGB_LED, HIGH);
     pinMode(SD_CS, OUTPUT);
-    digitalWrite(CM_PWR_EN, LOW);
+    digitalWrite(SD_CS, HIGH);
     pinMode(CM_RI, INPUT);
     pinMode(CM_STATUS, INPUT);
 

@@ -11,7 +11,7 @@
 #ifndef __HERTZ_h__
 #define __HERTZ_h__
 
-#ifdef PP_HERTZ
+#ifdef ARDUINO_PP_HERTZ
 
 #include "Arduino.h"
 #include "util/core.h"

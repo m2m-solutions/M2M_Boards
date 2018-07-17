@@ -14,12 +14,13 @@
 //
 // Includes
 //
-#include "Volt.h"
+#include "VoltBoard.h"
 #include "Wire.h"
 #include "util/rgbled.h"
 
 #define LM75A_ADDRESS				0x48
 #define LM75A_REGISTER_TEMP			0
+#define LM75A_REGISTER_CONFIG		1
 #define LM75A_INVALID_TEMPERATURE	-1000.0f
 
 VoltBoard::VoltBoard()
@@ -28,6 +29,7 @@ VoltBoard::VoltBoard()
 
 void VoltBoard::begin()
 {
+	Wire.begin();
     pinMode(VSW_EN, OUTPUT);
     digitalWrite(VSW_EN, HIGH);
     pinMode(FLASH_CE, OUTPUT);
@@ -35,23 +37,26 @@ void VoltBoard::begin()
     digitalWrite(MIRA_RESET, HIGH);
     pinMode(RGB_LED, OUTPUT);
     digitalWrite(RGB_LED, LOW);
+}
 
-	Wire.begin();
+char * VoltBoard::getSerialNumber()
+{
+    return (char *)0x3FF0;
 }
 
 float VoltBoard::getTemperature()
-{	
+{
 	Wire.beginTransmission(LM75A_ADDRESS);
 	Wire.write(LM75A_REGISTER_TEMP);
-	uint16_t result = Wire.endTransmission();
+	uint16_t result = Wire.endTransmission(true);
 	if (result != 0)
 	{
 		return LM75A_INVALID_TEMPERATURE;
-	}
+	} 
 	result = Wire.requestFrom(LM75A_ADDRESS, (uint8_t)2);
 	if (result != 2)
 	{
-		return false;
+		return LM75A_INVALID_TEMPERATURE;
 	}
 	uint16_t response = Wire.read() << 8;
 	response |= Wire.read();

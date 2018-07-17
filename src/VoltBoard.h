@@ -8,8 +8,8 @@
 // Licensed under the MIT license, see the LICENSE.txt file.
 //
 //---------------------------------------------------------------------------------------------
-#ifndef __VOLT_h__
-#define __VOLT_h__
+#ifndef __VOLTBOARD_h__
+#define __VOLTBOARD_h__
 
 #ifdef ARDUINO_PP_VOLT
 
@@ -22,6 +22,8 @@ public:
     VoltBoard();
     
     void begin();
+
+    char* getSerialNumber();
 
 	float getTemperature();
 

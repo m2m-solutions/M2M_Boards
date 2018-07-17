@@ -14,7 +14,7 @@
 //
 // Includes
 //
-#include "Hertz.h"
+#include "HertzBoard.h"
 #include "Wire.h"
 #include "util/rgbled.h"
 
@@ -44,6 +44,11 @@ void HertzBoard::begin()
     pinMode(CM_STATUS, INPUT);
 
 	Wire.begin();
+}
+
+char * HertzBoard::getSerialNumber()
+{
+    return (char *)0x3FF0;
 }
 
 float HertzBoard::getTemperature()

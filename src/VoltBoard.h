@@ -23,7 +23,7 @@ public:
     
     void begin();
 
-    char* getSerialNumber();
+    static char* getSerialNumber();
 
 	float getTemperature();
 

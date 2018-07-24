@@ -46,9 +46,19 @@ void HertzBoard::begin()
 	Wire.begin();
 }
 
-char * HertzBoard::getSerialNumber()
+const char* HertzBoard::getSerialNumber()
 {
-    return (char *)0x3FF0;
+    return (char *)0x3FF3;
+}
+
+const char* HertzBoard::getEncryptionKey()
+{
+    return (char *)0x3FB0;
+}
+
+const char* HertzBoard::getHashKey()
+{
+    return (char *)0x3FD1;
 }
 
 float HertzBoard::getTemperature()

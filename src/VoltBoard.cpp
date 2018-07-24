@@ -44,6 +44,16 @@ char * VoltBoard::getSerialNumber()
     return (char *)0x3FF0;
 }
 
+const char* VoltBoard::getEncryptionKey()
+{
+    return (char *)0x3FB0;
+}
+
+const char* VoltBoard::getHashKey()
+{
+    return (char *)0x3FD1;
+}
+
 float VoltBoard::getTemperature()
 {
 	Wire.beginTransmission(LM75A_ADDRESS);

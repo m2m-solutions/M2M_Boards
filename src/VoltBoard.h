@@ -23,7 +23,9 @@ public:
     
     void begin();
 
-    static char* getSerialNumber();
+    static const char* getSerialNumber();
+    static const char* getEncryptionKey();
+    static const char* getHashKey();
 
 	float getTemperature();
 

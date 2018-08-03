@@ -39,7 +39,7 @@ void VoltBoard::begin()
     digitalWrite(RGB_LED, LOW);
 }
 
-char * VoltBoard::getSerialNumber()
+const char * VoltBoard::getSerialNumber()
 {
     return (char *)0x3FF0;
 }

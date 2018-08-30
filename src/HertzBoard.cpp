@@ -29,7 +29,7 @@ HertzBoard::HertzBoard()
 void HertzBoard::begin()
 {
     pinMode(CM_PWRKEY, OUTPUT);
-    digitalWrite(CM_PWRKEY, LOW);
+    digitalWrite(CM_PWRKEY, HIGH);
     pinMode(CM_PWR_EN, OUTPUT);
     digitalWrite(CM_PWR_EN, LOW);
     pinMode(FLASH_CS, OUTPUT);

@@ -24,6 +24,7 @@ void setRgbLed(uint8_t pin, uint8_t red, uint8_t green, uint8_t blue, uint8_t in
     rgbValue |= (red * intensity / 100) << 8;
     rgbValue |= (blue * intensity / 100);
 
+    noInterrupts(); //disable all interrupts
     for(int i = 0; i < 24; i++) {
 		*set = pinMask;
         asm("nop; nop; nop; nop; nop; nop; nop; nop;");
@@ -42,4 +43,5 @@ void setRgbLed(uint8_t pin, uint8_t red, uint8_t green, uint8_t blue, uint8_t in
             asm("nop; nop; nop; nop; nop; nop; nop; nop; nop;");
         }
     }    	
+    interrupts(); //enable all interrupts
 }

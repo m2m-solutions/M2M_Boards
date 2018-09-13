@@ -30,8 +30,6 @@ void HertzBoard::begin()
 {
     pinMode(CM_PWRKEY, OUTPUT);
     digitalWrite(CM_PWRKEY, HIGH);
-    pinMode(CM_PWR_EN, OUTPUT);
-    digitalWrite(CM_PWR_EN, LOW);
     pinMode(FLASH_CS, OUTPUT);
     digitalWrite(FLASH_CS, HIGH);
     pinMode(MIRA_RESET, OUTPUT);
@@ -73,16 +71,11 @@ float HertzBoard::getTemperature()
 	result = Wire.requestFrom(LM75A_ADDRESS, (uint8_t)2);
 	if (result != 2)
 	{
-		return false;
+		return -1000;
 	}
 	uint16_t response = Wire.read() << 8;
 	response |= Wire.read();
 	return response / 256;
-}
-
-void HertzBoard::setCellularPower(bool state)
-{
-    digitalWrite(CM_PWR_EN, state);
 }
 
 uint8_t HertzBoard::getCellularStatus()

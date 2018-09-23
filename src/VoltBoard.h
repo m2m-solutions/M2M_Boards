@@ -14,7 +14,10 @@
 #ifdef ARDUINO_PP_VOLT
 
 #include "Arduino.h"
+#include "Wire.h"
 #include "util/core.h"
+
+#define LM75A_INVALID_TEMPERATURE	-1000.0f
 
 class VoltBoard
 {
@@ -28,15 +31,21 @@ public:
     static const char* getHashKey();
 
 	float getTemperature();
+    float getTemperatureInKelvin();
+    float getTemperatureInFarenheit();
 
     void setSwitchedPower(bool state);
 
     void setLed(uint8_t red, uint8_t green, uint8_t blue);
     void setLedIntensity(uint8_t percentage);
     
+    uint32_t getFreeMem();
+
     Watchdog watchdog;
 private:
     uint16_t _ledIntensity = 100;
+
+    bool read16bitRegister(const uint8_t reg, uint16_t& response);
 };
 
 #endif

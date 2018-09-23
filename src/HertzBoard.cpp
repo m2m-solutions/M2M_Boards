@@ -78,6 +78,26 @@ float HertzBoard::getTemperature()
 	return response / 256;
 }
 
+float HertzBoard::getTemperatureInKelvin()
+{
+	float result = getTemperature();
+	if (result != LM75A_INVALID_TEMPERATURE)
+	{
+ 		result += 273.15;		
+	}
+	return result;
+}
+
+float HertzBoard::getTemperatureInFarenheit()
+{
+	float result = getTemperature();
+	if (result != LM75A_INVALID_TEMPERATURE)
+	{
+ 		result = result * 9.0f / 15.0f + 32.0f;		
+	}
+	return result;
+}
+
 uint8_t HertzBoard::getCellularStatus()
 {
 	return !digitalRead(CM_STATUS);

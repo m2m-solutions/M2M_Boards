@@ -28,6 +28,8 @@ public:
     static const char* getHashKey();
 
 	float getTemperature();
+    float getTemperatureInKelvin();
+    float getTemperatureInFarenheit();
 
 	uint8_t getCellularStatus();
 

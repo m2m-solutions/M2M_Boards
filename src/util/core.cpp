@@ -125,8 +125,12 @@ void Watchdog::reset()
 {
     // Write the watchdog clear key value (0xA5) to the watchdog
     // clear register to clear the watchdog timer and reset it.
-    WDT->CLEAR.reg = WDT_CLEAR_CLEAR_KEY;
-    while(WDT->STATUS.bit.SYNCBUSY);
+    if(WDT->STATUS.bit.SYNCBUSY == false) /* synchronization is not busy, meaning it is synchronized */
+    {
+
+        WDT->CLEAR.reg = WDT_CLEAR_CLEAR_KEY; /* reset watchdog timer */
+
+    }
 }
 
 int Watchdog::sleep(int period)

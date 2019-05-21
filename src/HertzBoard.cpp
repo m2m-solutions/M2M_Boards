@@ -49,6 +49,11 @@ const char* HertzBoard::getSerialNumber()
     return (char *)0x3FF3;
 }
 
+const char* HertzBoard::getMqttPassword()
+{
+    return (char *)0x3F8F;
+}
+
 const char* HertzBoard::getEncryptionKey()
 {
     return (char *)0x3FB0;

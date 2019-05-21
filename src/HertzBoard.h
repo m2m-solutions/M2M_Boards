@@ -24,6 +24,7 @@ public:
     void begin();
 
     static const char* getSerialNumber();
+    static const char* getMqttPassword();
     static const char* getEncryptionKey();
     static const char* getHashKey();
 

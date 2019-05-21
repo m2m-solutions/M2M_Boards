@@ -43,6 +43,11 @@ const char* VoltBoard::getSerialNumber()
     return (char *)0x3FF3;
 }
 
+const char* VoltBoard::getMqttPassword()
+{
+    return (char *)0x3F8F;
+}
+
 const char* VoltBoard::getEncryptionKey()
 {
     return (char *)0x3FB0;

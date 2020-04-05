@@ -19,4 +19,5 @@ Purplepoint is an IoT cloud product.
 
 - Purplepoint Volt
 - Purplepoint Hertz
+- Purplepoint Joule DS
 

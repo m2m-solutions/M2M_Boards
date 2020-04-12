@@ -8,6 +8,8 @@
 // Licensed under the MIT license, see the LICENSE.txt file.
 //
 //---------------------------------------------------------------------------------------------
+#ifdef ARDUINO_ARCH_AVR
+
 #include "avrcore.h"
 #include <avr/wdt.h>
 #include <avr/sleep.h>
@@ -17,7 +19,7 @@ ISR(WDT_vect) {
     // Jst defined to prevent reset
 }
 
-uint16_t Watchdog::enable(uint16_t maxPeriod, bool forSleep)
+uint16_t Watchdog::enable(uint16_t maxPeriod, bool forSleep) 
 {
     uint16_t actualPeriod;
     if((maxPeriod >= 8000) || (maxPeriod == 0)) {
@@ -54,10 +56,10 @@ uint16_t Watchdog::enable(uint16_t maxPeriod, bool forSleep)
     if (forSleep)
     {
         // Build watchdog prescaler register value before timing critical code.
-        uint8_t wdps = ((sleepWDTO & 0x08 ? 1 : 0) << WDP3) |
-                    ((sleepWDTO & 0x04 ? 1 : 0) << WDP2) |
-                    ((sleepWDTO & 0x02 ? 1 : 0) << WDP1) |
-                    ((sleepWDTO & 0x01 ? 1 : 0) << WDP0);
+        uint8_t wdps = ((wdtoValue & 0x08 ? 1 : 0) << WDP3) |
+                    ((wdtoValue & 0x04 ? 1 : 0) << WDP2) |
+                    ((wdtoValue & 0x02 ? 1 : 0) << WDP1) |
+                    ((wdtoValue & 0x01 ? 1 : 0) << WDP0);
 
         // The next section is timing critical so interrupts are disabled.
         cli();
@@ -104,3 +106,5 @@ int Watchdog::sleep(int period)
 {
     return enable(period, true);
 }
+
+#endif

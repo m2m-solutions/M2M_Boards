@@ -10,6 +10,9 @@
 //---------------------------------------------------------------------------------------------
 #ifndef __core_h__
 #define __core_h__
+
+#ifdef ARDUINO_ARCH_SAMD
+
 #include <sam.h>
 
 class Watchdog
@@ -80,4 +83,5 @@ static inline void system_sleep(void)
 	__WFI();
 }
 
+#endif
 #endif

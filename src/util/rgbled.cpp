@@ -13,6 +13,7 @@
 
 void setRgbLed(uint8_t pin, uint8_t red, uint8_t green, uint8_t blue, uint8_t intensity)
 {
+    #ifdef ARDUINO_ARCH_SAMD
     uint8_t portNum = g_APinDescription[pin].ulPort;
     uint32_t  pinMask = 1ul << g_APinDescription[pin].ulPin;
     uint32_t bitMask = 0x800000;
@@ -44,4 +45,5 @@ void setRgbLed(uint8_t pin, uint8_t red, uint8_t green, uint8_t blue, uint8_t in
         }
     }    	
     interrupts(); //enable all interrupts
+    #endif
 }

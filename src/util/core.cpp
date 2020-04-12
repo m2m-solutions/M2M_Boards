@@ -8,6 +8,8 @@
 // Licensed under the MIT license, see the LICENSE.txt file.
 //
 //---------------------------------------------------------------------------------------------
+#ifdef ARDUINO_ARCH_SAMD
+
 #include "core.h"
 #include <sam.h>
 //#include "power.h"
@@ -170,3 +172,5 @@ void Watchdog::initialize()
 
     isInitialized = true;
 }
+
+#endif

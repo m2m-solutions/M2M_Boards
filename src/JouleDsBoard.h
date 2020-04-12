@@ -16,29 +16,33 @@
 #include "Arduino.h"
 #include "util/avrcore.h"
 
-class HertzDsBoard
+class JouleDsBoard
 {
 public:
-    HertzBoard();
+    JouleDsBoard();
     
     void begin();
 
-    static const char* getSerialNumber(char* buffer);
-    static const char* getMqttPassword(char* buffer);
-    static const char* getEncryptionKey(char* buffer);
-    static const char* getHashKey(cahr* buffer);
+    static void getSerialNumber(char* buffer);
+    static void getMqttPassword(char* buffer);
+    static void getEncryptionKey(char* buffer);
+    static void getHashKey(char* buffer);
 
 	float getTemperature();
     float getTemperatureInKelvin();
     float getTemperatureInFarenheit();
 
 	float getBatteryVoltage();
-    
+    float getRegulatedVoltage();
+
     void setSwitchedPower(bool state);
+    void setDistanceSensorEnable(bool state);
+
+    void setLed(bool state);
 
     Watchdog watchdog;
 private:
-    void CopyEepromString(uint16_t address);
+    static void CopyEepromString(uint16_t address, char* buffer);
 };
 
 #endif

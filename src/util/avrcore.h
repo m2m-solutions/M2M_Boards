@@ -11,19 +11,24 @@
 #ifndef __avrcore_h__
 #define __avrcore_h__
 
+#ifdef ARDUINO_ARCH_AVR
+
+#include "Arduino.h"
+
 class Watchdog
 {
 public:
 	Watchdog():
 		wdtoValue(-1)
 	{}
-	int enable(int maxPeriod = 0, bool forSleep = false);
+	uint16_t enable(uint16_t maxPeriod = 0, bool forSleep = false);
 	void disable();
 	void reset();
 	int sleep(int period = 0);
 
 private:
-	uint16_t wdtoValue;
+	int16_t wdtoValue;
 };
 
+#endif
 #endif

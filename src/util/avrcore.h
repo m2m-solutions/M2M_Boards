@@ -15,6 +15,8 @@
 
 #include "Arduino.h"
 
+float readVcc();
+
 class Watchdog
 {
 public:
@@ -24,7 +26,7 @@ public:
 	uint16_t enable(uint16_t maxPeriod = 0, bool forSleep = false);
 	void disable();
 	void reset();
-	int sleep(int period = 0);
+	uint16_t sleep(uint16_t period = 0);
 
 private:
 	int16_t wdtoValue;

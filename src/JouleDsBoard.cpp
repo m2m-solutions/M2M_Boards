@@ -22,10 +22,36 @@
 #define MQTT_PASSWORD_ADDR		SERIAL_NUMBER_ADDR + 24
 #define ENCRYPTION_KEY_ADDR		MQTT_PASSWORD_ADDR + 24
 #define HASH_KEY_ADDR			ENCRYPTION_KEY_ADDR + 24
+#define VOLTAGE_CALIBRATION		HASH_KEY_ADDR + 24
 #define INVALID_TEMPERATURE		-1000.0
+#define DS_MEASURE_COUNT		1
+
+#ifdef JOULE_DS_DEBUG
+#define DS_ERROR(...) if (_logger != nullptr) _logger->error(__VA_ARGS__)
+#define DS_INFO(...) if (_logger != nullptr) _logger->info(__VA_ARGS__)
+#define DS_DEBUG(...) if (_logger != nullptr) _logger->debug(__VA_ARGS__)
+#define DS_TRACE(...) if (_logger != nullptr) _logger->trace(__VA_ARGS__)
+#define DS_TRACE_START(...) if (_logger != nullptr) _logger->traceStart(__VA_ARGS__)
+#define DS_TRACE_PART(...) if (_logger != nullptr) _logger->tracePart(__VA_ARGS__)
+#define DS_TRACE_END(...) if (_logger != nullptr) _logger->traceEnd(__VA_ARGS__)
+#else
+#define DS_ERROR(...)
+#define DS_INFO(...)
+#define DS_DEBUG(...)
+#define DS_TRACE(...)
+#define DS_TRACE_START(...)
+#define DS_TRACE_PART(...)
+#define DS_TRACE_END(...)
+#endif
 
 JouleDsBoard::JouleDsBoard()
-    : watchdog()
+    : watchdog(),
+	radioDriver { PIN_RFM_CS, PIN_RFM_IRQ },
+	radio { radioDriver },
+    _distanceSensorEnabled { false },
+    _radioEnabled { false },
+	_radioLongRange { false },
+	_logger { NULL }
 {}
 
 void JouleDsBoard::begin()
@@ -42,8 +68,15 @@ void JouleDsBoard::begin()
 	pinMode(PIN_WD_DONE, OUTPUT);
     pinMode(PIN_PWR_AD, INPUT);
 	pinMode(PIN_TMP_AD, INPUT);
-
 	Wire.begin();
+}
+
+//---------------------------------------------------------------------------------------------
+// Board functions
+
+void JouleDsBoard::setLogger(Logger* logger)
+{
+	_logger = logger;
 }
 
 void JouleDsBoard::getSerialNumber(char* buffer)
@@ -113,40 +146,33 @@ float JouleDsBoard::getTemperatureInFarenheit()
 
 float JouleDsBoard::getBatteryVoltage()
 {
+	const float vcc = 3.3;	// Joule DS has a linear voltage regulator @3.3V +-1%
 	digitalWrite(PIN_PWR_AD_EN, HIGH);	
-	delay(20);	// We have 100nF cap on the ADC input, just let let it charge
+	delay(20);	// We have 100nF cap on the ADC input, just let let it charge up first
 	uint16_t value = analogRead(PIN_PWR_AD);
 	digitalWrite(PIN_PWR_AD_EN, LOW);
-	float vcc = getRegulatedVoltage();
 	float percentage = 2 * value / 1024.0;
 	return (percentage * vcc);
 }
 
 float JouleDsBoard::getRegulatedVoltage()
 {
-	ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
-
-	delay(2); // Wait for Vref to settle
-	ADCSRA |= _BV(ADSC); // Start conversion
-	while (bit_is_set(ADCSRA,ADSC)); // measuring
-
-	uint8_t low  = ADCL; // must read ADCL first - it then locks ADCH  
-	uint8_t high = ADCH; // unlocks both
-
-	long result = (high<<8) | low;
-
-	result = 1125300L / result; // Calculate Vcc (in mV); 1125300 = 1.1*1023*1000
-	return result / 1000.0; // Vcc in millivolts
+	return readVcc();
 }
 
-void JouleDsBoard::setSwitchedPower(bool state)
+void JouleDsBoard::setSwitchedPowerEnabled(bool state)
 {
+	DS_TRACE(F("Switched power: %i"), state);
 	digitalWrite(PIN_VSW_EN, !state);
+	if (!state)
+	{
+		_radioEnabled = false;
+	}
 }
 
-void JouleDsBoard::setDistanceSensorEnable(bool state)
+bool JouleDsBoard::getSwitchedPowerEnabled()
 {
-	digitalWrite(PIN_DSXSHUT, state);
+	return digitalRead(PIN_VSW_EN);
 }
 
 void JouleDsBoard::setLed(bool state)
@@ -164,6 +190,160 @@ void JouleDsBoard::CopyEepromString(uint16_t address, char* buffer)
     	buffer[index] = value;
 		index++;
   	} while (value != 0);	
+}
+
+//---------------------------------------------------------------------------------------------
+// Distance sensor
+
+bool JouleDsBoard::setDistanceSensorEnabled(bool state)
+{
+	DS_TRACE(F("Distance sensor enabled: %i"), state);
+	if (state)
+	{
+		digitalWrite(PIN_DSXSHUT, true);
+  		if (!distanceSensor.init())
+  		{
+		    return false;
+  		}
+		distanceSensor.setTimeout(500);
+		distanceSensor.setMeasurementTimingBudget(66000);
+	}
+	else
+	{
+		digitalWrite(PIN_DSXSHUT, false);
+	}
+	return true;
+}
+
+float JouleDsBoard::getMeasuredDistance()
+{
+	uint16_t distances[DS_MEASURE_COUNT];
+	for (int i = 0; i < DS_MEASURE_COUNT; i++)
+  	{
+    	distances[i] = distanceSensor.readRangeSingleMillimeters();
+		DS_TRACE("Measured distance: %i", distances[i]);
+  	}
+  	sortArray(distances, DS_MEASURE_COUNT);
+  	uint16_t measuredDistance = distances[DS_MEASURE_COUNT / 2];
+	return (float)measuredDistance / 1000.0;  	
+}
+
+//---------------------------------------------------------------------------------------------
+// Radio 
+
+bool JouleDsBoard::setRadioEnabled(bool state, bool longRange)
+{
+	DS_TRACE(F("Radio enabled: %i"), state);
+	_radioEnabled = false;
+	if (state)
+	{
+		if (!radio.init())
+		{
+			DS_ERROR("radio.init failed");
+			return false;
+		}
+  		radioDriver.setFrequency(868.0);
+		radioDriver.setTxPower(20, true);
+		radio.setRetries(3);
+		if (longRange)
+		{
+			radio.setTimeout(1000);
+			RH_RF95::ModemConfig modem_config = {
+    			0x78, // Reg 0x1D: BW=125kHz, Coding=4/8, Header=explicit
+    			0xC4, // Reg 0x1E: Spread=4096chips/symbol, CRC=enable
+    			0x08  // Reg 0x26: LowDataRate=On, Agc=Off.  0x0C is LowDataRate=ON, ACG=ON
+  			};
+  			radioDriver.setModemRegisters(&modem_config);
+  			if (!radioDriver.setModemConfig(RH_RF95::Bw125Cr48Sf4096))
+  			{
+				DS_ERROR(F("setModemConfig failed"));
+				return false;
+  			}			
+		}
+		else
+		{
+			radio.setTimeout(200);			
+		}
+		_radioEnabled = true;
+	}
+	delay(50);
+	return true;
+}
+
+void JouleDsBoard::setRadioTxPower(uint8_t level)
+{
+	if (_radioEnabled)
+	{
+		radioDriver.setTxPower(level, true);
+	}
+}
+
+void JouleDsBoard::setRadioTimeout(uint16_t timeout)
+{
+	if (_radioEnabled)
+	{
+		radio.setTimeout(timeout);
+	}
+}
+
+void JouleDsBoard::setRadioRetries(uint8_t count)
+{
+	if (_radioEnabled)
+	{
+		radio.setRetries(count);
+	}
+}
+
+void JouleDsBoard::setRadioModemRegisters(const RH_RF95::ModemConfig* config)
+{
+	if (_radioEnabled)
+	{		
+		radioDriver.setModemRegisters(config);
+	}
+}
+
+void JouleDsBoard::setRadioModemConfig(RH_RF95::ModemConfigChoice index)
+{
+	if (_radioEnabled)
+	{
+		radioDriver.setModemConfig(index);
+	}
+}
+
+void JouleDsBoard::setRadioSpreadingFactor(uint8_t factor)
+{
+	if (_radioEnabled)
+	{
+		radioDriver.setSpreadingFactor(factor);
+	}
+}
+
+uint16_t JouleDsBoard:: getRadioLastSNR()
+{
+	return radioDriver.lastSNR();
+}
+
+void JouleDsBoard::sortArray(uint16_t values[], uint8_t count)
+{
+	uint16_t min_idx;  
+  
+    // One by one move boundary of unsorted subarray  
+    for (uint16_t i = 0; i < count - 1; i++)  
+    {  
+        // Find the minimum element in unsorted array  
+        min_idx = i;  
+        for (uint16_t j = i + 1; j < count; j++)
+		{
+        	if (values[j] < values[min_idx])
+			{
+            	min_idx = j;
+			}
+		}
+        // Swap the found minimum element with the first element
+		uint16_t temp = values[min_idx];
+		values[i] = values[min_idx];
+		values[min_idx] = temp;
+    }
 }
 
 #endif
